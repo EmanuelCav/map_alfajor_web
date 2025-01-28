@@ -8,13 +8,15 @@ import { firestore } from '../firebase.config'
 import CurrentMarker from "./app/components/CurrentMarker";
 import AlfajoresList from "./app/components/AlfajoresList";
 import ShowKiosco from "./app/components/ShowKiosco";
+import SearchInput from "./app/components/SearchInput";
+import ResultSearch from "./app/components/ResultSearch";
 
 import { generalStore } from "./app/server/store";
 
 import { IAddKiosco, IKiosco } from "./app/interface/Kiosco";
 import { IAlfajor, IAlfajorSelected } from "./app/interface/Alfajor";
 
-const Map = () => {
+const App = () => {
 
   const position: [number, number] = [-34.6083, -58.3712]
 
@@ -24,6 +26,7 @@ const Map = () => {
   const [addAlfajores, setAddAlfajores] = useState<boolean>(false)
   const [isShowKiosco, setIsShowKiosco] = useState<boolean>(false)
   const [isCreateAlfajor, setIsCreateAlfajor] = useState<boolean>(false)
+  const [isFiltered, setIsFiltered] = useState<boolean>(false)
 
   const [error, setError] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
@@ -50,11 +53,15 @@ const Map = () => {
   const acceptAlfajor = () => {
     setCurrentMarker([])
     showKiosco({})
+    setSearchQuery("")
+    setError("")
   }
 
   const acceptKiosco = () => {
     setIsShowKiosco(false)
     showKiosco({})
+    setSearchQuery("")
+    setError("")
   }
 
   const createKiosco = async (alfajoresAdded: IAlfajorSelected[]) => {
@@ -147,6 +154,60 @@ const Map = () => {
     setIsShowKiosco(true)
   }
 
+  const handleSearch = async (alf: string) => {
+
+    setLoading(true)
+
+    try {
+      const kioscoCollection = collection(firestore, "kiosco");
+      const snapshot = await getDocs(kioscoCollection);
+      const data: IKiosco[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      const filterData = data.filter((dataAlf) =>
+        dataAlf.alfajores?.some((alfajor) =>
+          alfajor.alfajor.toLowerCase().includes(alf.toLowerCase())
+        )
+      );
+
+      setIsFiltered(true)
+      showKioscos(filterData)
+
+    } catch (error) {
+      console.error("Error fetching kiosco data:", error);
+    } finally {
+      setLoading(false);
+    }
+
+    setSearchQuery("")
+  }
+
+  const removeFilter = async () => {
+
+    setLoading(true)
+
+    try {
+      const kioscoCollection = collection(firestore, "kiosco")
+      const snapshot = await getDocs(kioscoCollection);
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      showKioscos(data)
+
+    } catch (error) {
+      console.error("Error fetching kiosco data:", error);
+    } finally {
+      setLoading(false)
+    }
+
+    setIsFiltered(false)
+
+  }
+
   useEffect(() => {
 
     const fetchKioscoData = async () => {
@@ -189,6 +250,10 @@ const Map = () => {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       {
+        (!isShowKiosco && !addAlfajores && currentMarker.length === 0) &&
+        <SearchInput searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      }
+      {
         currentMarker.length > 0 && <CurrentMarker
           acceptAlfajor={acceptAlfajor}
           addAlfajor={addAlfajor} />
@@ -200,6 +265,17 @@ const Map = () => {
       {
         isShowKiosco && kiosco.id && <ShowKiosco kiosco={kiosco}
           acceptKiosco={acceptKiosco} addAlfajor={addAlfajor} />
+      }
+      {
+        ((searchQuery.length > 0) && (!isShowKiosco && !addAlfajores && currentMarker.length === 0)) && <ResultSearch handleSearch={handleSearch}
+          data={alfajorData.sort((a, b) => a.alfajor.localeCompare(b.alfajor))}
+          searchQuery={searchQuery} />
+      }
+      {
+        ((isFiltered) && (!isShowKiosco && !addAlfajores && currentMarker.length === 0)) && <button onClick={removeFilter}
+          className="absolute z-10 top-20 left-20 p-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-500 text-white font-semibold cursor-pointer">
+          Quitar filtros
+        </button>
       }
       <MapContainer center={position} zoom={5}
         doubleClickZoom={false}
@@ -230,4 +306,4 @@ const Map = () => {
   );
 };
 
-export default Map;
+export default App;

@@ -12,7 +12,7 @@ const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor }: ShowKioscoPropsType) =
                             <div className="flex flex-col items-center justify-center">
                                 <div className="w-full overflow-y-auto">
                                     {
-                                        kiosco.alfajores!.map((item) => (
+                                        kiosco.alfajores!.sort((a, b) => a.alfajor.localeCompare(b.alfajor)).map((item) => (
                                             <div key={item.id} className="my-1">
                                                 <p className="text-amber-500 text-xl text-center font-semibold">{item.alfajor}</p>
                                             </div>
