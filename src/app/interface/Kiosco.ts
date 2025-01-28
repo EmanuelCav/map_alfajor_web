@@ -14,8 +14,3 @@ export interface IAddKiosco {
     alfajores: IAlfajorSelected[];
     createdAt: Date;
 }
-
-export interface ICreateKiosco {
-    latitude: number;
-    longitude: number;
-}

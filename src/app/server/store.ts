@@ -23,7 +23,7 @@ export const generalStore = create(
             })),
         }),
         {
-            name: `${process.env.VITE_STORAGE?.trim()}`
+            name: `${import.meta.env.VITE_STORAGE?.trim()}`
         }
     )
 )
