@@ -7,6 +7,7 @@ import { firestore } from '../firebase.config'
 
 import CurrentMarker from "./app/components/CurrentMarker";
 import AlfajoresList from "./app/components/AlfajoresList";
+import ShowKiosco from "./app/components/ShowKiosco";
 
 import { generalStore } from "./app/server/store";
 
@@ -23,7 +24,7 @@ const Map = () => {
   const [addAlfajores, setAddAlfajores] = useState<boolean>(false)
   const [isShowKiosco, setIsShowKiosco] = useState<boolean>(false)
   const [isCreateAlfajor, setIsCreateAlfajor] = useState<boolean>(false)
-  
+
   const [error, setError] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
 
@@ -48,10 +49,12 @@ const Map = () => {
 
   const acceptAlfajor = () => {
     setCurrentMarker([])
+    showKiosco({})
   }
 
   const acceptKiosco = () => {
     setIsShowKiosco(false)
+    showKiosco({})
   }
 
   const createKiosco = async (alfajoresAdded: IAlfajorSelected[]) => {
@@ -194,6 +197,10 @@ const Map = () => {
         addAlfajores && <AlfajoresList alfajores={alfajorData} createAlfajor={() => setIsCreateAlfajor(true)}
           createKiosco={kiosco.id ? updateKiosco : createKiosco} kiosco={kiosco} error={error} />
       }
+      {
+        isShowKiosco && kiosco.id && <ShowKiosco kiosco={kiosco}
+          acceptKiosco={acceptKiosco} addAlfajor={addAlfajor} />
+      }
       <MapContainer center={position} zoom={5}
         doubleClickZoom={false}
         className="w-full h-full">
@@ -209,6 +216,11 @@ const Map = () => {
         <AddMarkerOnClick />
         {kioscos.map((marker) => {
           return <Marker
+            eventHandlers={{
+              click: () => {
+                getMarker(marker)
+              },
+            }}
             key={marker.id}
             position={[marker.latitude as number, marker.longitude as number]}
           />

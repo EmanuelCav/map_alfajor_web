@@ -1,3 +1,4 @@
+import { PropsWithChildren } from "react";
 import { IAlfajor, IAlfajorSelected } from "../interface/Alfajor";
 import { IKiosco } from "../interface/Kiosco";
 
@@ -38,3 +39,7 @@ export type CreateAlfajorFormPropsType = {
     error: string;
     handleComeback: () => void;
 }
+
+export type BackgroundPropsType = PropsWithChildren<{
+    zIndex: string;
+}>
