@@ -11,6 +11,7 @@ import ShowKiosco from "./app/components/ShowKiosco";
 import SearchInput from "./app/components/SearchInput";
 import ResultSearch from "./app/components/ResultSearch";
 import CreateAlfajorForm from "./app/components/CreateAlfajorForm";
+import Loading from "./app/components/Loading";
 
 import { generalStore } from "./app/server/store";
 
@@ -28,6 +29,7 @@ const App = () => {
   const [isShowKiosco, setIsShowKiosco] = useState<boolean>(false)
   const [isCreateAlfajor, setIsCreateAlfajor] = useState<boolean>(false)
   const [isFiltered, setIsFiltered] = useState<boolean>(false)
+  const [width, setWidth] = useState<number>(window.innerWidth);
 
   const [error, setError] = useState<string>("")
   const [createData, setCreateData] = useState<string>("")
@@ -39,13 +41,23 @@ const App = () => {
   const [currentMarker, setCurrentMarker] = useState<[number, number][]>([])
 
   const AddMarkerOnClick = () => {
-    const map = useMapEvents({
-      contextmenu: (e) => {
-        const { lat, lng } = e.latlng
-        setCurrentMarker([[lat, lng]])
-        map.flyTo([lat, lng], 18)
-      }
-    })
+    if (width <= 768) {
+      const map = useMapEvents({
+        click: (e) => {
+          const { lat, lng } = e.latlng
+          setCurrentMarker([[lat, lng]])
+          map.flyTo([lat, lng], 18)
+        }
+      })
+    } else {
+      const map = useMapEvents({
+        contextmenu: (e) => {
+          const { lat, lng } = e.latlng
+          setCurrentMarker([[lat, lng]])
+          map.flyTo([lat, lng], 18)
+        }
+      })
+    }
 
     return null
   }
@@ -244,10 +256,10 @@ const App = () => {
     }
 
     const alfajorStr = createData.split(" ")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
-    if(alfajorData.find((alf) => alf.alfajor === alfajorStr)) {
+    if (alfajorData.find((alf) => alf.alfajor === alfajorStr)) {
       setError("El alfajor ya se encuentra en la lista")
       return
     }
@@ -281,6 +293,13 @@ const App = () => {
     setIsCreateAlfajor(false)
 
   }
+
+  useEffect(() => {
+    window.addEventListener('resize', () => setWidth(window.innerWidth))
+    return () => {
+      window.removeEventListener('resize', () => setWidth(window.innerWidth))
+    }
+  }, [])
 
   useEffect(() => {
 
@@ -317,7 +336,7 @@ const App = () => {
 
   if (loading) {
     return (
-      <></>
+      <Loading />
     );
   }
 
@@ -356,9 +375,13 @@ const App = () => {
         <div className="absolute z-10 top-1/2 left-1/2 flex items-center justify-center" style={{
           transform: "translate(-50%, -50%)"
         }}>
-          <p className="text-red-500 text-amber-600 opacity-50 text-center select-none">
-            Selecciona un negocio o Haz clic DERECHO para localizar un nuevo
-          </p>
+          {
+            width <= 768 ? <p className="text-red-500 text-amber-600 opacity-50 text-center select-none">
+              Selecciona un negocio o Haz clic para localizar un nuevo
+            </p> : <p className="text-red-500 text-amber-600 opacity-50 text-center select-none">
+              Selecciona un negocio o Haz clic DERECHO para localizar un nuevo
+            </p>
+          }
         </div>
       }
       {

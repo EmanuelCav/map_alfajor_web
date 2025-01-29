@@ -49,8 +49,8 @@ const AlfajoresList = ({ alfajores, createAlfajor, createKiosco, error, kiosco }
             <div className="w-full h-full flex flex-col">
                 <div className="flex-1 overflow-hidden">
                     <p className="my-2 text-center text-lg text-amber-600 font-semibold">Selecciona los alfajores disponibles</p>
-                    <div className="w-full py-3 flex justify-evenly items-center flex-row">
-                        <p className="text-lg text-amber-600">¿No encuentra su alfajor?</p>
+                    <div className="w-full py-3 flex justify-evenly items-center flex-wrap">
+                        <p className="text-lg text-amber-600 text-center">¿No encuentra su alfajor?</p>
                         <button className="px-2 py-1 bg-amber-500 cursor-pointer hover:bg-amber-600 active:bg-amber-500" onClick={createAlfajor}>
                             <p className="text-lg font-semibold text-white">Añadir</p>
                         </button>

@@ -20,10 +20,11 @@ const ResultSearch = ({ data, searchQuery, handleSearch }: ResultSearchPropsType
         }).slice(0, 6)
 
     return (
-        <div className="absolute bg-white z-10 top-18 sm:top-20 left-15 sm:left-20 rounded-md border border-gray-500 w-72 flex justify-center flex-col items-center px-2">
+        <div className="absolute bg-white z-20 top-20 left-10 sm:left-20 rounded-md border border-gray-500 w-72 flex justify-center flex-col items-center">
             {
                 filteredResults.map((alfajor) => {
-                    return <button className="py-2 border-b border-gray-200 w-full" key={alfajor.id} onClick={() => handleSearch(alfajor.alfajor)}>
+                    return <button className="py-2 border-b border-gray-200 w-full rounded-md hover:bg-gray-100 active:bg-white cursor-pointer mx-2" 
+                    key={alfajor.id} onClick={() => handleSearch(alfajor.alfajor)}>
                         {alfajor.alfajor}
                     </button>
                 })

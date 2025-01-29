@@ -9,16 +9,14 @@ const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor }: ShowKioscoPropsType) =
                     <p className="text-3xl text-amber-600 font-bold text-center my-2">Alfajores disponibles</p>
                     {
                         kiosco.alfajores?.length! > 0 ? (
-                            <div className="flex flex-col items-center justify-center">
-                                <div className="w-full overflow-y-auto">
-                                    {
-                                        kiosco.alfajores!.sort((a, b) => a.alfajor.localeCompare(b.alfajor)).map((item) => (
-                                            <div key={item.id} className="my-1">
-                                                <p className="text-amber-500 text-xl text-center font-semibold">{item.alfajor}</p>
-                                            </div>
-                                        ))
-                                    }
-                                </div>
+                            <div className="w-full h-3/4 overflow-y-auto">
+                                {
+                                    kiosco.alfajores!.sort((a, b) => a.alfajor.localeCompare(b.alfajor)).map((item) => (
+                                        <div key={item.id} className="my-1">
+                                            <p className="text-amber-500 text-xl text-center font-semibold">{item.alfajor}</p>
+                                        </div>
+                                    ))
+                                }
                             </div>
                         ) : (
                             <div className="flex justify-center items-center">
