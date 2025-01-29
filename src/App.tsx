@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { addDoc, collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
@@ -10,11 +10,12 @@ import AlfajoresList from "./app/components/AlfajoresList";
 import ShowKiosco from "./app/components/ShowKiosco";
 import SearchInput from "./app/components/SearchInput";
 import ResultSearch from "./app/components/ResultSearch";
+import CreateAlfajorForm from "./app/components/CreateAlfajorForm";
 
 import { generalStore } from "./app/server/store";
 
 import { IAddKiosco, IKiosco } from "./app/interface/Kiosco";
-import { IAlfajor, IAlfajorSelected } from "./app/interface/Alfajor";
+import { IAlfajor, IAlfajorSelected, ICreateAlfajor } from "./app/interface/Alfajor";
 
 const App = () => {
 
@@ -29,7 +30,10 @@ const App = () => {
   const [isFiltered, setIsFiltered] = useState<boolean>(false)
 
   const [error, setError] = useState<string>("")
+  const [createData, setCreateData] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
+
+  const [zoom, setZoom] = useState<number>(5)
 
   const [alfajorData, setAlfajorData] = useState<IAlfajor[]>([])
   const [currentMarker, setCurrentMarker] = useState<[number, number][]>([])
@@ -42,6 +46,24 @@ const App = () => {
         map.flyTo([lat, lng], 18)
       }
     })
+
+    return null
+  }
+
+  const ZoomDisplay = () => {
+    const map = useMap()
+
+    useEffect(() => {
+      const handleZoom = () => {
+        setZoom(map.getZoom())
+      };
+
+      map.on("zoomend", handleZoom)
+
+      return () => {
+        map.off("zoomend", handleZoom)
+      }
+    }, [map])
 
     return null
   }
@@ -154,6 +176,12 @@ const App = () => {
     setIsShowKiosco(true)
   }
 
+  const handleComeback = () => {
+    setError("")
+    setCreateData("")
+    setIsCreateAlfajor(false)
+  }
+
   const handleSearch = async (alf: string) => {
 
     setLoading(true)
@@ -205,6 +233,52 @@ const App = () => {
     }
 
     setIsFiltered(false)
+
+  }
+
+  const handleCreateAlfajor = async () => {
+
+    if (createData.length === 0) {
+      setError("El campo se encuentra vacio")
+      return
+    }
+
+    const alfajorStr = createData.split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+    if(alfajorData.find((alf) => alf.alfajor === alfajorStr)) {
+      setError("El alfajor ya se encuentra en la lista")
+      return
+    }
+
+    setLoading(true)
+
+    try {
+
+      const newAlfajor: ICreateAlfajor = {
+        alfajor: alfajorStr,
+      }
+
+      const alfajorCollection = collection(firestore, "alfajor")
+      const docRef = await addDoc(alfajorCollection, newAlfajor);
+      const fetchedDoc = await getDoc(doc(firestore, "alfajor", docRef.id));
+
+      if (fetchedDoc.exists()) {
+        setAlfajorData([...alfajorData, { id: fetchedDoc.id, alfajor: newAlfajor.alfajor }])
+      } else {
+        console.log("Alfajor does not exists.");
+      }
+
+    } catch (error) {
+      console.error("Error creating alfajor:", error);
+    } finally {
+      setLoading(false)
+    }
+
+    setError("Se añadió un nuevo alfajor!")
+    setCreateData("")
+    setIsCreateAlfajor(false)
 
   }
 
@@ -277,6 +351,21 @@ const App = () => {
           Quitar filtros
         </button>
       }
+      {
+        ((zoom < 9) && (!isShowKiosco && !addAlfajores && currentMarker.length === 0)) &&
+        <div className="absolute z-10 top-1/2 left-1/2 flex items-center justify-center" style={{
+          transform: "translate(-50%, -50%)"
+        }}>
+          <p className="text-red-500 text-amber-600 opacity-50 text-center select-none">
+            Selecciona un negocio o Haz clic DERECHO para localizar un nuevo
+          </p>
+        </div>
+      }
+      {
+        isCreateAlfajor && <CreateAlfajorForm handleCreateAlfajor={handleCreateAlfajor}
+          createData={createData} setCreateData={setCreateData} error={error}
+          handleComeback={handleComeback} />
+      }
       <MapContainer center={position} zoom={5}
         doubleClickZoom={false}
         className="w-full h-full">
@@ -290,6 +379,7 @@ const App = () => {
           />
         }
         <AddMarkerOnClick />
+        <ZoomDisplay />
         {kioscos.map((marker) => {
           return <Marker
             eventHandlers={{

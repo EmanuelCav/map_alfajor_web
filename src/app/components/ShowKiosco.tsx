@@ -5,7 +5,7 @@ const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor }: ShowKioscoPropsType) =
     return (
         <Background zIndex="z-10">
             <div className="w-full h-full flex flex-col">
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-hidden">
                     <p className="text-3xl text-amber-600 font-bold text-center my-2">Alfajores disponibles</p>
                     {
                         kiosco.alfajores?.length! > 0 ? (

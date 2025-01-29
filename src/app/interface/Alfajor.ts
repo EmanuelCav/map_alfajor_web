@@ -8,3 +8,7 @@ export interface IAlfajorSelected {
     alfajor: string;
     isSelected: boolean;
 }
+
+export interface ICreateAlfajor {
+    alfajor: string;
+}
