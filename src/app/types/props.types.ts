@@ -5,6 +5,9 @@ import { IKiosco } from "../interface/Kiosco";
 export type CurrentMarkerPropsType = {
     addAlfajor: () => void;
     acceptAlfajor: () => void;
+    setDetails: (details: string) => void;
+    details: string;
+    error: string;
 }
 
 export type AlfajoresListPropsType = {
@@ -19,6 +22,7 @@ export type ShowKioscoPropsType = {
     kiosco: IKiosco;
     acceptKiosco: () => void;
     addAlfajor: () => void;
+    error: string;
 }
 
 export type SearchInputPropsType = {

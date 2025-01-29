@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { addDoc, collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
@@ -22,6 +23,13 @@ const App = () => {
 
   const position: [number, number] = [-34.6083, -58.3712]
 
+  const customIcon = new L.Icon({
+    iconUrl: "/icon.png",
+    iconSize: [40, 40],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+
   const { showKioscos, kioscos, showKiosco, kiosco, uploadKiosco, editKiosco } = generalStore()
 
   const [loading, setLoading] = useState<boolean>(true)
@@ -34,6 +42,7 @@ const App = () => {
   const [error, setError] = useState<string>("")
   const [createData, setCreateData] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
+  const [details, setDetails] = useState<string>("")
 
   const [zoom, setZoom] = useState<number>(5)
 
@@ -80,6 +89,20 @@ const App = () => {
     return null
   }
 
+  const RecenterAutomatically = () => {
+    const map = useMap()
+
+    if(kiosco.id) {
+      useEffect(() => {
+        map.setView([kiosco.latitude as number, kiosco.longitude as number], 18, {
+          animate: true
+        });
+      }, [kiosco])
+    }
+
+     return null
+   }   
+
   const addAlfajor = async () => {
     setAddAlfajores(true)
   }
@@ -110,6 +133,7 @@ const App = () => {
           alfajores: alfajoresAdded.filter(alf => alf.isSelected),
           latitude: currentMarker[0][0],
           longitude: currentMarker[0][1],
+          details,
           createdAt: new Date()
         }
 
@@ -120,6 +144,7 @@ const App = () => {
         if (fetchedDoc.exists()) {
           uploadKiosco({ id: fetchedDoc.id, ...fetchedDoc.data() })
           showKiosco({ id: fetchedDoc.id, ...fetchedDoc.data() })
+          setError("Se ha creado correctamente")
         } else {
           console.log("Kiosco does not exists.");
         }
@@ -131,6 +156,7 @@ const App = () => {
       }
     }
 
+    setDetails("")
     setAddAlfajores(false)
   }
 
@@ -163,6 +189,7 @@ const App = () => {
 
             showKiosco(updatedKioscoData)
             editKiosco(updatedKioscoData)
+            setError("Se ha actualizado correctamente")
 
           } else {
             console.log("Kiosco does not exists");
@@ -192,6 +219,11 @@ const App = () => {
     setError("")
     setCreateData("")
     setIsCreateAlfajor(false)
+  }
+
+  const openFormCreateAlfajor = () => {
+    setIsCreateAlfajor(true)
+    setError("")
   }
 
   const handleSearch = async (alf: string) => {
@@ -348,15 +380,16 @@ const App = () => {
       }
       {
         currentMarker.length > 0 && <CurrentMarker
-          acceptAlfajor={acceptAlfajor}
+          setDetails={setDetails} details={details}
+          acceptAlfajor={acceptAlfajor} error={error}
           addAlfajor={addAlfajor} />
       }
       {
-        addAlfajores && <AlfajoresList alfajores={alfajorData} createAlfajor={() => setIsCreateAlfajor(true)}
+        addAlfajores && <AlfajoresList alfajores={alfajorData} createAlfajor={openFormCreateAlfajor}
           createKiosco={kiosco.id ? updateKiosco : createKiosco} kiosco={kiosco} error={error} />
       }
       {
-        isShowKiosco && kiosco.id && <ShowKiosco kiosco={kiosco}
+        isShowKiosco && kiosco.id && <ShowKiosco kiosco={kiosco} error={error}
           acceptKiosco={acceptKiosco} addAlfajor={addAlfajor} />
       }
       {
@@ -389,8 +422,11 @@ const App = () => {
           createData={createData} setCreateData={setCreateData} error={error}
           handleComeback={handleComeback} />
       }
-      <MapContainer center={position} zoom={5}
+      <MapContainer
+        center={position}
+        zoom={5}
         doubleClickZoom={false}
+        attributionControl={false}
         className="w-full h-full">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -398,13 +434,16 @@ const App = () => {
         />
         {
           currentMarker.length > 0 && <Marker
+            icon={customIcon}
             position={[currentMarker[0][0] as number, currentMarker[0][1] as number]}
           />
         }
         <AddMarkerOnClick />
         <ZoomDisplay />
+        <RecenterAutomatically />
         {kioscos.map((marker) => {
           return <Marker
+            icon={customIcon}
             eventHandlers={{
               click: () => {
                 getMarker(marker)

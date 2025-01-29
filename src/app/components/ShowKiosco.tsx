@@ -1,12 +1,15 @@
 import Background from "../layout/Background"
 import { ShowKioscoPropsType } from "../types/props.types"
 
-const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor }: ShowKioscoPropsType) => {
+const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor, error }: ShowKioscoPropsType) => {
     return (
         <Background zIndex="z-10">
             <div className="w-full h-full flex flex-col">
                 <div className="flex-1 overflow-hidden">
-                    <p className="text-3xl text-amber-600 font-bold text-center my-2">Alfajores disponibles</p>
+                    <p className="text-xl md:text-3xl text-amber-600 font-bold text-center my-2">Alfajores disponibles</p>
+                    {
+                        error && <p className="text-lg text-emerald-500 text-center my-1">{error}</p>
+                    }
                     {
                         kiosco.alfajores?.length! > 0 ? (
                             <div className="w-full h-3/4 overflow-y-auto">
@@ -26,6 +29,13 @@ const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor }: ShowKioscoPropsType) =
                     }
                 </div>
                 <div className="w-full">
+                    {
+                        kiosco.details &&
+                        <p className="text-lg">
+                            <span className="text-amber-600 font-semibold">Detalles: </span>
+                            {kiosco.details}
+                        </p>
+                    }
                     <button
                         onClick={addAlfajor}
                         className="p-3 cursor-pointer text-white text-xl font-semibold w-full bg-amber-500 hover:bg-amber-600 active:bg-amber-500 my-2">
