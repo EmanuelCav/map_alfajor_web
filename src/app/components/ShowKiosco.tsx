@@ -1,4 +1,5 @@
 import Background from "../layout/Background"
+
 import { ShowKioscoPropsType } from "../types/props.types"
 
 const ShowKiosco = ({ kiosco, acceptKiosco, addAlfajor, error }: ShowKioscoPropsType) => {
