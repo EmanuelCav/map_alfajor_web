@@ -289,7 +289,7 @@ const App = () => {
 
     const alfajorStr = createData.split(" ")
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
+      .join(" ").trim();
 
     if (alfajorData.find((alf) => alf.alfajor === alfajorStr)) {
       setError("El alfajor ya se encuentra en la lista")
