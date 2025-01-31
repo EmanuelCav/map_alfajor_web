@@ -14,5 +14,5 @@
 - TypeScript
 - React
 - Zustand
-- Context
+- TailwindCSS
 - Firebase
