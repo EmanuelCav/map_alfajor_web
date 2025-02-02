@@ -22,6 +22,7 @@ import { IAlfajor, IAlfajorSelected, ICreateAlfajor } from "./app/interface/Alfa
 const App = () => {
 
   const position: [number, number] = [-34.6083, -58.3712]
+  const currentPath = window.location.pathname;
 
   const customIcon = new L.Icon({
     iconUrl: "/icon.png",
@@ -92,7 +93,7 @@ const App = () => {
   const RecenterAutomatically = () => {
     const map = useMap()
 
-    if(kiosco.id) {
+    if (kiosco.id) {
       useEffect(() => {
         map.setView([kiosco.latitude as number, kiosco.longitude as number], 18, {
           animate: true
@@ -100,8 +101,8 @@ const App = () => {
       }, [kiosco])
     }
 
-     return null
-   }   
+    return null
+  }
 
   const addAlfajor = async () => {
     setAddAlfajores(true)
@@ -365,6 +366,11 @@ const App = () => {
 
     fetchKioscoData();
   }, [])
+
+  if (currentPath !== '/') {
+    window.location.replace('/')
+    return null
+  }
 
   if (loading) {
     return (
